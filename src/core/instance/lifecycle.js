@@ -56,6 +56,7 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  // 私有方法。作用是将VNode渲染成真实的DOM；调用时机：1: 首次渲染 2: 数据更新的时候
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -138,6 +139,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 挂载组件
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -176,7 +178,7 @@ export function mountComponent (
       const endTag = `vue-perf-end:${id}`
 
       mark(startTag)
-      const vnode = vm._render()
+      const vnode = vm._render() // 将vue实例变成VNode节点组成的树
       mark(endTag)
       measure(`vue ${name} render`, startTag, endTag)
 
@@ -205,6 +207,7 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
+  // $vnode表示vue实例的父虚拟node，为null表示当前是根的vue的实例
   if (vm.$vnode == null) {
     vm._isMounted = true
     callHook(vm, 'mounted')

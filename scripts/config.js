@@ -36,11 +36,12 @@ const resolve = p => {
 }
 
 const builds = {
+  /* runtime：运行时。需要把.vue文件编译成js，因为这些在编译时已经做好了，所以只包含运行时的vue.js代码 */
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-cjs-dev': {
-    entry: resolve('web/entry-runtime.js'),
-    dest: resolve('dist/vue.runtime.common.dev.js'),
-    format: 'cjs',
+    entry: resolve('web/entry-runtime.js'), // 入口文件
+    dest: resolve('dist/vue.runtime.common.dev.js'), // 构建后的输出文件地址
+    format: 'cjs', // 构建出来的文件要遵循的规范（cjs：Commonjs，es：ES Moudle，umd：UMD（兼容commonJS和AMD））
     env: 'development',
     banner
   },

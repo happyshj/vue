@@ -122,6 +122,7 @@ export function createPatchFunction (backend) {
 
   let creatingElmInVPre = 0
 
+  // 通过虚拟Node创建真实的DOM并插入到它的父节点中
   function createElm (
     vnode,
     insertedVnodeQueue,
@@ -141,6 +142,7 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    // 创建子组件
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -149,6 +151,7 @@ export function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
+      // 包含tag，先简单对tag的合法性做校验
       if (process.env.NODE_ENV !== 'production') {
         if (data && data.pre) {
           creatingElmInVPre++
@@ -163,6 +166,7 @@ export function createPatchFunction (backend) {
         }
       }
 
+      // 创建占位符元素
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode)
@@ -697,6 +701,10 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // oldVnode: 表示旧的VNode节点，可以不存在或者是一个DOM对象
+  // vnode：表示执行_render后返回的VNode的节点
+  // hydrating: 是否是服务端渲染
+  // removeOnly: 给transition-group用的
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
@@ -740,7 +748,7 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
-          oldVnode = emptyNodeAt(oldVnode)
+          oldVnode = emptyNodeAt(oldVnode) // 把oldVnode转换成VNode对象
         }
 
         // replacing existing element
@@ -748,6 +756,7 @@ export function createPatchFunction (backend) {
         const parentElm = nodeOps.parentNode(oldElm)
 
         // create new node
+        // 通过虚拟节点创建真实的DOM并插入到它的父节点中
         createElm(
           vnode,
           insertedVnodeQueue,

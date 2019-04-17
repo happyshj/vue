@@ -1,5 +1,7 @@
 /* @flow */
 
+// 初始化vue
+
 import config from '../config'
 import { initProxy } from './proxy'
 import { initState } from './state'
@@ -14,6 +16,7 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
+    /* 合并配置 */
     const vm: Component = this
     // a uid
     vm._uid = uid++
@@ -49,12 +52,12 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
-    initRender(vm)
+    initLifecycle(vm) // 初始化生命周期
+    initEvents(vm) // 初始化事件中心
+    initRender(vm) // 初始化渲染
     callHook(vm, 'beforeCreate')
     initInjections(vm) // resolve injections before data/props
-    initState(vm)
+    initState(vm) // 初始化data、props、computed、watcher。。。。。
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 
@@ -66,7 +69,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
-      vm.$mount(vm.$options.el)
+      vm.$mount(vm.$options.el) // vm.$mount挂载vm，挂载的目标就是把模板渲染成最终的DOM
     }
   }
 }

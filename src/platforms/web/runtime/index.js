@@ -1,6 +1,9 @@
 /* @flow */
 
-import Vue from 'core/index'
+import Vue from 'core/index' // 真正初始化vue的地方
+
+// 后面都是对vue对象做对扩展
+
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'

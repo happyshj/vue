@@ -1,3 +1,5 @@
+// vue定义
+
 import { initMixin } from './init'
 import { stateMixin } from './state'
 import { renderMixin } from './render'

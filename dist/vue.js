@@ -764,6 +764,7 @@
 
   /*  */
 
+  // Vnode的定义
   var VNode = function VNode (
     tag,
     data,
@@ -3336,8 +3337,8 @@
 
   /*  */
 
-  var SIMPLE_NORMALIZE = 1;
-  var ALWAYS_NORMALIZE = 2;
+  var SIMPLE_NORMALIZE = 1; // render函数是编译生成的
+  var ALWAYS_NORMALIZE = 2; // 1: render函数是用户手写的；2: 编译slot、v-for的时候产生嵌套数组的情况
 
   // wrapper function for providing a more flexible interface
   // without getting yelled at by flow
@@ -3360,6 +3361,15 @@
     return _createElement(context, tag, data, children, normalizationType)
   }
 
+  // 真正创建VNode的函数
+  /**
+   * 
+   * @param {*} context Vnode的上下文环境
+   * @param {*} tag 标签
+   * @param {*} data VNode数据
+   * @param {*} children 当前VNode的子节点
+   * @param {*} normalizationType 子节点规范的类型
+   */
   function _createElement (
     context,
     tag,
@@ -3394,7 +3404,9 @@
         );
       }
     }
+
     // support single function children as default scoped slot
+    // 规范化children，将children变成一个类型为VNode的Array
     if (Array.isArray(children) &&
       typeof children[0] === 'function'
     ) {
@@ -3407,6 +3419,8 @@
     } else if (normalizationType === SIMPLE_NORMALIZE) {
       children = simpleNormalizeChildren(children);
     }
+
+    // 创建VNode的实例
     var vnode, ns;
     if (typeof tag === 'string') {
       var Ctor;
@@ -3518,6 +3532,7 @@
       return nextTick(fn, this)
     };
 
+    // 私有方法，把实例渲染成虚拟Node
     Vue.prototype._render = function () {
       var vm = this;
       var ref = vm.$options;
@@ -3927,6 +3942,7 @@
   }
 
   function lifecycleMixin (Vue) {
+    // 私有方法。作用是将VNode渲染成真实的DOM；调用时机：1: 首次渲染 2: 数据更新的时候
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       var prevEl = vm.$el;
@@ -4009,6 +4025,7 @@
     };
   }
 
+  // 挂载组件
   function mountComponent (
     vm,
     el,
@@ -4047,7 +4064,7 @@
         var endTag = "vue-perf-end:" + id;
 
         mark(startTag);
-        var vnode = vm._render();
+        var vnode = vm._render(); // 将vue实例变成VNode节点组成的树
         mark(endTag);
         measure(("vue " + name + " render"), startTag, endTag);
 
@@ -4076,6 +4093,7 @@
 
     // manually mounted instance, call mounted on self
     // mounted is called for render-created child components in its inserted hook
+    // $vnode表示vue实例的父虚拟node，为null表示当前是根的vue的实例
     if (vm.$vnode == null) {
       vm._isMounted = true;
       callHook(vm, 'mounted');
@@ -4953,6 +4971,7 @@
 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
+      /* 合并配置 */
       var vm = this;
       // a uid
       vm._uid = uid$3++;
@@ -4986,12 +5005,12 @@
       }
       // expose real self
       vm._self = vm;
-      initLifecycle(vm);
-      initEvents(vm);
-      initRender(vm);
+      initLifecycle(vm); // 初始化生命周期
+      initEvents(vm); // 初始化事件中心
+      initRender(vm); // 初始化渲染
       callHook(vm, 'beforeCreate');
       initInjections(vm); // resolve injections before data/props
-      initState(vm);
+      initState(vm); // 初始化data、props、computed、watcher。。。。。
       initProvide(vm); // resolve provide after data/props
       callHook(vm, 'created');
 
@@ -5003,7 +5022,7 @@
       }
 
       if (vm.$options.el) {
-        vm.$mount(vm.$options.el);
+        vm.$mount(vm.$options.el); // vm.$mount挂载vm，挂载的目标就是把模板渲染成最终的DOM
       }
     };
   }
@@ -5063,6 +5082,8 @@
     }
     return modified
   }
+
+  // vue定义
 
   function Vue (options) {
     if (!(this instanceof Vue)
@@ -5419,7 +5440,9 @@
     initAssetRegisters(Vue);
   }
 
-  initGlobalAPI(Vue);
+  // 真正初始化vue的地方
+
+  initGlobalAPI(Vue); // 全局方法（定义在类而不是实例上面的方法）（静态方法）
 
   Object.defineProperty(Vue.prototype, '$isServer', {
     get: isServerRendering
@@ -5892,6 +5915,7 @@
 
     var creatingElmInVPre = 0;
 
+    // 通过虚拟Node创建真实的DOM并插入到它的父节点中
     function createElm (
       vnode,
       insertedVnodeQueue,
@@ -5911,6 +5935,7 @@
       }
 
       vnode.isRootInsert = !nested; // for transition enter check
+      // 创建子组件
       if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
         return
       }
@@ -5919,6 +5944,7 @@
       var children = vnode.children;
       var tag = vnode.tag;
       if (isDef(tag)) {
+        // 包含tag，先简单对tag的合法性做校验
         {
           if (data && data.pre) {
             creatingElmInVPre++;
@@ -5933,6 +5959,7 @@
           }
         }
 
+        // 创建占位符元素
         vnode.elm = vnode.ns
           ? nodeOps.createElementNS(vnode.ns, tag)
           : nodeOps.createElement(tag, vnode);
@@ -6449,6 +6476,10 @@
       }
     }
 
+    // oldVnode: 表示旧的VNode节点，可以不存在或者是一个DOM对象
+    // vnode：表示执行_render后返回的VNode的节点
+    // hydrating: 是否是服务端渲染
+    // removeOnly: 给transition-group用的
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
       if (isUndef(vnode)) {
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
@@ -6492,7 +6523,7 @@
             }
             // either not server-rendered, or hydration failed.
             // create an empty node and replace it
-            oldVnode = emptyNodeAt(oldVnode);
+            oldVnode = emptyNodeAt(oldVnode); // 把oldVnode转换成VNode对象
           }
 
           // replacing existing element
@@ -6500,6 +6531,7 @@
           var parentElm = nodeOps.parentNode(oldElm);
 
           // create new node
+          // 通过虚拟节点创建真实的DOM并插入到它的父节点中
           createElm(
             vnode,
             insertedVnodeQueue,
@@ -11853,13 +11885,15 @@
     return el && el.innerHTML
   });
 
-  var mount = Vue.prototype.$mount;
+  var mount = Vue.prototype.$mount; // 缓存vue原型上的$mount方法
+  // 重新定义mount方法
   Vue.prototype.$mount = function (
     el,
     hydrating
   ) {
     el = el && query(el);
 
+    // 不能挂载在body或者html上，因为所有的挂载元素会被 Vue 生成的 DOM 替换
     /* istanbul ignore if */
     if (el === document.body || el === document.documentElement) {
       warn(
@@ -11868,7 +11902,7 @@
       return this
     }
 
-    var options = this.$options;
+    var options = this.$options; // vue实例的初始化选项
     // resolve template/el and convert to render function
     if (!options.render) {
       var template = options.template;

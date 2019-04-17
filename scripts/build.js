@@ -1,3 +1,5 @@
+// yarn build，构建入口
+
 const fs = require('fs')
 const path = require('path')
 const zlib = require('zlib')
@@ -8,6 +10,7 @@ if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
+// 先从配置文件读取配置
 let builds = require('./config').getAllBuilds()
 
 // filter builds via command line arg

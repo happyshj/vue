@@ -1,5 +1,7 @@
 /* @flow */
 
+// vue利用createElement方法创建VNode
+
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
@@ -20,8 +22,8 @@ import {
   simpleNormalizeChildren
 } from './helpers/index'
 
-const SIMPLE_NORMALIZE = 1
-const ALWAYS_NORMALIZE = 2
+const SIMPLE_NORMALIZE = 1 // render函数是编译生成的
+const ALWAYS_NORMALIZE = 2 // 1: render函数是用户手写的；2: 编译slot、v-for的时候产生嵌套数组的情况
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
@@ -44,6 +46,15 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
+// 真正创建VNode的函数
+/**
+ * 
+ * @param {*} context Vnode的上下文环境
+ * @param {*} tag 标签
+ * @param {*} data VNode数据
+ * @param {*} children 当前VNode的子节点
+ * @param {*} normalizationType 子节点规范的类型
+ */
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
@@ -79,7 +90,9 @@ export function _createElement (
       )
     }
   }
+
   // support single function children as default scoped slot
+  // 规范化children，将children变成一个类型为VNode的Array
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
   ) {
@@ -92,6 +105,8 @@ export function _createElement (
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
+
+  // 创建VNode的实例
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor

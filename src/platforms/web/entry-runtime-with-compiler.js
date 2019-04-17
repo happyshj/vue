@@ -1,12 +1,15 @@
 /* @flow */
 
+// Runtime + Compiler 构建出来的 Vue.js
+// import Vue from 'vue'，从这里开始
+
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
 
-import Vue from './runtime/index'
+import Vue from './runtime/index' // vue来源
 import { query } from './util/index'
-import { compileToFunctions } from './compiler/index'
+import { compileToFunctions } from './compiler/index' // .vue || el || template...最终转换成render方法
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
 const idToTemplate = cached(id => {
@@ -14,13 +17,15 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
-const mount = Vue.prototype.$mount
+const mount = Vue.prototype.$mount // 缓存vue原型上的$mount方法
+// 重新定义mount方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
   el = el && query(el)
 
+  // 不能挂载在body或者html上，因为所有的挂载元素会被 Vue 生成的 DOM 替换
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -29,7 +34,7 @@ Vue.prototype.$mount = function (
     return this
   }
 
-  const options = this.$options
+  const options = this.$options // vue实例的初始化选项
   // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template
